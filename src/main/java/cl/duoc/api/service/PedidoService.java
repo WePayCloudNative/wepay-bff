@@ -5,6 +5,8 @@ import cl.duoc.api.dto.PedidoResponse;
 import cl.duoc.api.dto.UsuarioResponse;
 import cl.duoc.api.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -20,7 +22,8 @@ public class PedidoService {
     }
 
     public List<PedidoResponse> obtenerPedidos(String oid, String email, String nombre) {
-        // 1. Preguntamos al ms-usuario qué rol tiene esta persona (y lo crea si no existe)
+        // 1. Preguntamos al ms-usuario qué rol tiene esta persona (y lo crea si no
+        // existe)
         UsuarioResponse usuario = usuarioService.obtenerPerfil(oid, email, nombre);
 
         // 2. Tomamos la decisión
@@ -35,5 +38,13 @@ public class PedidoService {
 
     public PedidoResponse crearPedido(String oid, PedidoRequest request) {
         return pedidoRepository.crearPedido(oid, request);
+    }
+
+    public PedidoResponse actualizarEstado(String oid, String email, String nombre, Long id, String status) {
+        UsuarioResponse usuario = usuarioService.obtenerPerfil(oid, email, nombre);
+        if (!"ADMIN".equalsIgnoreCase(usuario.rol())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo un administrador puede cambiar el estado");
+        }
+        return pedidoRepository.actualizarEstado(id, status);
     }
 }

@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import java.util.Map;
 
 import java.util.List;
 
@@ -58,5 +61,16 @@ public class DataController {
     public PedidoResponse crearPedido(@AuthenticationPrincipal Jwt jwt, @RequestBody PedidoRequest request) {
         String oid = jwt.getClaimAsString("oid");
         return pedidoService.crearPedido(oid, request);
+    }
+
+    @PutMapping("/pedidos/{id}/status")
+    public PedidoResponse actualizarEstado(@AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        return pedidoService.actualizarEstado(
+                jwt.getClaimAsString("oid"),
+                jwt.getClaimAsString("preferred_username"),
+                jwt.getClaimAsString("name"),
+                id, body.get("status"));
     }
 }

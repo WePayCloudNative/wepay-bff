@@ -25,6 +25,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                         .requestMatchers(HttpMethod.GET, "/api/data", "/api/perfil", "/api/productos", "/api/productos/**", "/api/pedidos", "/api/pedidos/**").hasAuthority("SCOPE_access_as_user")
                                         .requestMatchers(HttpMethod.POST, "/api/pedidos").hasAuthority("SCOPE_access_as_user")
+                                        .requestMatchers(HttpMethod.PUT, "/api/pedidos/*/status").hasAuthority("SCOPE_access_as_user")
                                         .requestMatchers("/error").permitAll()
                                         .anyRequest().denyAll()
                                 )

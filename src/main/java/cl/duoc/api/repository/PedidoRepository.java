@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestClient;
+import java.util.Map;
 
 import java.util.List;
 
@@ -36,6 +37,13 @@ public class PedidoRepository {
         return restClient.post()
                 .uri("/api/pedidos/crear/" + oid)
                 .body(request)
+                .retrieve()
+                .body(PedidoResponse.class);
+    }
+    public PedidoResponse actualizarEstado(Long id, String status){
+        return restClient.put()
+                .uri("/api/pedidos/{id}/status", id)
+                .body(Map.of("status", status))
                 .retrieve()
                 .body(PedidoResponse.class);
     }
