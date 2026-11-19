@@ -73,4 +73,9 @@ public class DataController {
                 jwt.getClaimAsString("name"),
                 id, body.get("status"));
     }
+
+    @PostMapping("/pedidos/{id}/cancelar")
+    public PedidoResponse cancelarPedido(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        return pedidoService.cancelarPorCliente(jwt.getClaimAsString("oid"), id);
+    }
 }

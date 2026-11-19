@@ -9,12 +9,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final UsuarioService usuarioService;
+
+    // Un cliente solo puede cancelar antes de que el pedido entre a preparación
+    private static final Set<String> CANCELABLES_POR_CLIENTE = Set.of("CREADO", "ACEPTADO");
 
     public PedidoService(PedidoRepository pedidoRepository, UsuarioService usuarioService) {
         this.pedidoRepository = pedidoRepository;
@@ -46,5 +50,25 @@ public class PedidoService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo un administrador puede cambiar el estado");
         }
         return pedidoRepository.actualizarEstado(id, status);
+    }
+
+    public PedidoResponse cancelarPorCliente(String oid, Long id) {
+        // 1. Solo buscamos entre SUS pedidos: si el id es de otro usuario, responde 404
+        //    (así no se revela que ese pedido existe)
+        List<PedidoResponse> propios = pedidoRepository.obtenerPorUsuario(oid);
+        PedidoResponse pedido = (propios == null ? List.<PedidoResponse>of() : propios).stream()
+                .filter(p -> id.equals(p.id()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido no encontrado"));
+
+        // 2. Solo se puede cancelar en CREADO o ACEPTADO
+        String estado = pedido.estado() == null ? "" : pedido.estado().toUpperCase();
+        if (!CANCELABLES_POR_CLIENTE.contains(estado)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "El pedido está " + estado + " y ya no se puede cancelar");
+        }
+
+        // 3. Mismo camino que el admin: ms-pedidos guarda y publica pedido.estado.cancelado
+        return pedidoRepository.actualizarEstado(id, "CANCELADO");
     }
 }
