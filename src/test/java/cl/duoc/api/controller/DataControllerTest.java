@@ -44,7 +44,7 @@ class DataControllerTest {
         ProductService productService = mock(ProductService.class);
         PedidoService pedidoService = mock(PedidoService.class); // <-- Creamos el mock
         
-        List<ProductResponse> esperados = List.of(new ProductResponse("Producto", "Descripcion", 1000));
+        List<ProductResponse> esperados = List.of(new ProductResponse(1L, "Producto", "Descripcion", 1000, "Periféricos", "/img/productos/teclado.jpg", null));
         when(productService.obtenerProductos()).thenReturn(esperados);
 
         // Pasamos los 3 servicios al constructor

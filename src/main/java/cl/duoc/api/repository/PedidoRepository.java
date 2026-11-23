@@ -1,6 +1,6 @@
 package cl.duoc.api.repository;
 
-import cl.duoc.api.dto.PedidoRequest;
+import cl.duoc.api.dto.ItemPedidoRequest;
 import cl.duoc.api.dto.PedidoResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,10 +33,10 @@ public class PedidoRepository {
                 .body(new ParameterizedTypeReference<List<PedidoResponse>>() {});
     }
 
-    public PedidoResponse crearPedido(String oid, PedidoRequest request) {
+    public PedidoResponse crearPedido(String oid, List<ItemPedidoRequest> items) {
         return restClient.post()
-                .uri("/api/pedidos/crear/" + oid)
-                .body(request)
+                .uri("/api/pedidos/crear/{oid}", oid)
+                .body(Map.of("items", items))
                 .retrieve()
                 .body(PedidoResponse.class);
     }
