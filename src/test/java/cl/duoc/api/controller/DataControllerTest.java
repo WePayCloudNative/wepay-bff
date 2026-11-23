@@ -27,7 +27,7 @@ class DataControllerTest {
         when(jwt.getClaimAsString("preferred_username")).thenReturn("ana@duoc.cl");
         when(jwt.getClaimAsString("name")).thenReturn("Ana");
 
-        UsuarioResponse esperado = new UsuarioResponse("oid-123", "Ana", "ana@duoc.cl", "user");
+        UsuarioResponse esperado = new UsuarioResponse("oid-123", "Ana", "ana@duoc.cl", "user", null);
         when(usuarioService.obtenerPerfil("oid-123", "ana@duoc.cl", "Ana")).thenReturn(esperado);
 
         // Pasamos los 3 servicios al constructor

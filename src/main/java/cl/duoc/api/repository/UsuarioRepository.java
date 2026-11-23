@@ -1,5 +1,6 @@
 package cl.duoc.api.repository;
 
+import cl.duoc.api.dto.DireccionDespacho;
 import cl.duoc.api.dto.UsuarioResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class UsuarioRepository {
                 .body(UsuarioResponse.class);
         } catch (HttpClientErrorException e) {
         if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-            var usuario = new UsuarioResponse(oid, nombre, email, "user");
+            var usuario = new UsuarioResponse(oid, nombre, email, "user", null);
             return restClient
                     .post()
                     .uri("/api/usuarios")
@@ -42,4 +43,14 @@ public class UsuarioRepository {
         }
     }
     
+
+    public UsuarioResponse guardarDireccion(String oid, DireccionDespacho direccion) {
+        return restClient
+                .put()
+                .uri("/api/usuarios/{oid}/direccion", oid)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(direccion)
+                .retrieve()
+                .body(UsuarioResponse.class);
+    }
 }

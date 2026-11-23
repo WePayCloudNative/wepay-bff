@@ -62,6 +62,6 @@ public class ApiExceptionHandler {
         if (m.find() && !m.group(2).isBlank()) {
             return m.group(2);
         }
-        return "El pedido no se pudo procesar (" + ex.getStatusCode().value() + ")";
+        return "La solicitud no se pudo procesar (" + ex.getStatusCode().value() + ")";
     }
 }
