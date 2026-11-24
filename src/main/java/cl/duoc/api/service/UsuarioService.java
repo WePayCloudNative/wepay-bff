@@ -3,7 +3,9 @@ package cl.duoc.api.service;
 import cl.duoc.api.dto.DireccionDespacho;
 import cl.duoc.api.dto.UsuarioResponse;
 import cl.duoc.api.repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UsuarioService {
@@ -21,5 +23,20 @@ public class UsuarioService {
     public UsuarioResponse guardarDireccion(String oid, String email, String nombre, DireccionDespacho direccion) {
         usuarioRepository.buscarPorOid(oid, email, nombre);
         return usuarioRepository.guardarDireccion(oid, direccion);
+    }
+
+    /** El rol lo decide ms-clientes, nunca el front. */
+    public static boolean esAdmin(UsuarioResponse usuario) {
+        return usuario != null && "ADMIN".equalsIgnoreCase(usuario.rol());
+    }
+
+    /** Devuelve el perfil si es admin; si no, responde 403. */
+    public UsuarioResponse exigirAdmin(String oid, String email, String nombre) {
+        UsuarioResponse usuario = obtenerPerfil(oid, email, nombre);
+        if (!esAdmin(usuario)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Solo un administrador puede ver esta información");
+        }
+        return usuario;
     }
 }

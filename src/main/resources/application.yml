@@ -16,3 +16,7 @@ microservices:
         base-url: ${MS_PRODUCTOS_URL:http://localhost:8084}
     pedidos:
         base-url: ${MS_PEDIDOS_URL:http://localhost:8085}
+    auditoria:
+        base-url: ${MS_AUDITORIA_URL:http://localhost:8086}
+    reportes:
+        base-url: ${MS_REPORTES_URL:http://localhost:8087}
