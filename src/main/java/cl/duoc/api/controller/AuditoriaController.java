@@ -52,11 +52,15 @@ public class AuditoriaController {
                 id);
     }
 
+    /** desde y hasta en UTC (ISO); el front los calcula según el período elegido. */
     @GetMapping("/reportes")
-    public ResumenReportesResponse reportes(@AuthenticationPrincipal Jwt jwt) {
+    public ResumenReportesResponse reportes(@AuthenticationPrincipal Jwt jwt,
+            @RequestParam String desde,
+            @RequestParam String hasta) {
         return reporteService.resumen(
                 jwt.getClaimAsString("oid"),
                 jwt.getClaimAsString("preferred_username"),
-                jwt.getClaimAsString("name"));
+                jwt.getClaimAsString("name"),
+                desde, hasta);
     }
 }

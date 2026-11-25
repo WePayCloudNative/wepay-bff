@@ -1,10 +1,20 @@
 package cl.duoc.api.dto;
 
 import java.util.List;
+import java.util.Map;
 
-/** Los tres reportes juntos: el panel del admin los carga con una sola llamada. */
+/**
+ * Panel de reportes de un período, tal como lo calcula ms-reportes.
+ * anterior = período de igual largo justo antes (para comparar).
+ * agrupacion = "hora" o "dia" (cómo vienen los tramos de ventasPorTramo).
+ */
 public record ResumenReportesResponse(
-        KpiResponse kpis,
+        String desde,
+        String hasta,
+        String agrupacion,
+        IndicadoresResponse actual,
+        IndicadoresResponse anterior,
+        Map<String, Long> pedidosPorEstado,
         List<TopProductoResponse> topProductos,
-        List<VentasPorHoraResponse> ventasPorHora) {
+        List<VentasPorTramoResponse> ventasPorTramo) {
 }
