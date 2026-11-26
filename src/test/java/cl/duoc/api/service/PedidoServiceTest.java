@@ -98,7 +98,7 @@ class PedidoServiceTest {
         when(pedidoRepository.obtenerPorUsuario("oid-ana")).thenReturn(List.of());
 
         esperarError(HttpStatus.NOT_FOUND, () -> servicio.cancelarPorCliente("oid-ana", 15L));
-        verify(pedidoRepository, never()).actualizarEstado(anyLong(), anyString());
+        verify(pedidoRepository, never()).actualizarEstado(anyLong(), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -116,6 +116,7 @@ class PedidoServiceTest {
 
         servicio.cancelarPorCliente("oid-ana", 15L);
 
-        verify(pedidoRepository).actualizarEstado(15L, "CANCELADO");
+        // Queda registrado que lo canceló el propio cliente (para auditoría)
+        verify(pedidoRepository).actualizarEstado(15L, "CANCELADO", "oid-ana", "CLIENTE");
     }
 }

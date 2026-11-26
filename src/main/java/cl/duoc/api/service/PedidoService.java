@@ -78,7 +78,7 @@ public class PedidoService {
         if (!"ADMIN".equalsIgnoreCase(usuario.rol())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo un administrador puede cambiar el estado");
         }
-        return pedidoRepository.actualizarEstado(id, status);
+        return pedidoRepository.actualizarEstado(id, status, oid, "ADMIN");
     }
 
     public PedidoResponse cancelarPorCliente(String oid, Long id) {
@@ -98,6 +98,6 @@ public class PedidoService {
         }
 
         // 3. Mismo camino que el admin: ms-pedidos guarda y publica pedido.estado.cancelado
-        return pedidoRepository.actualizarEstado(id, "CANCELADO");
+        return pedidoRepository.actualizarEstado(id, "CANCELADO", oid, "CLIENTE");
     }
 }

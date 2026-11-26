@@ -1,10 +1,12 @@
 package cl.duoc.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -15,6 +17,7 @@ import cl.duoc.api.dto.UsuarioResponse;
 import cl.duoc.api.repository.AuditoriaRepository;
 import cl.duoc.api.repository.UsuarioRepository;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -48,7 +51,13 @@ class AuditoriaServiceTest {
     }
 
     private static EventoAuditoriaResponse evento(long id, String oid, String tipo, String fecha) {
-        return new EventoAuditoriaResponse(id, oid, tipo, "15", fecha, "wepay-ms-pedidos", "{}");
+        return evento(id, oid, tipo, fecha, null, null);
+    }
+
+    private static EventoAuditoriaResponse evento(long id, String oid, String tipo, String fecha,
+            String actorOid, String actorRol) {
+        return new EventoAuditoriaResponse(id, oid, tipo, "15", fecha, "wepay-ms-pedidos", "{}",
+                actorOid, actorRol, null, null, null, null);
     }
 
     @Test
@@ -147,5 +156,56 @@ class AuditoriaServiceTest {
         when(auditoriaRepository.obtenerPorPedido(99L)).thenReturn(null);
 
         assertEquals(List.of(), servicio.historialDePedido(OID_ANA, null, null, 99L));
+    }
+
+    @Test
+    void agregaElNombreDelClienteYDeQuienHizoElCambio() {
+        when(auditoriaRepository.obtenerTodos()).thenReturn(List.of(
+                evento(1, OID_ANA, "OrderDispatched", "2026-11-24T10:00:00", OID_ADMIN, "ADMIN")));
+        when(usuarioRepository.obtener(OID_ANA))
+                .thenReturn(Optional.of(new UsuarioResponse(OID_ANA, "Ana", "ana@duoc.cl", "USER", null)));
+        when(usuarioRepository.obtener(OID_ADMIN))
+                .thenReturn(Optional.of(new UsuarioResponse(OID_ADMIN, "Jose", "jose@duoc.cl", "ADMIN", null)));
+
+        EventoAuditoriaResponse e = servicio.listar(OID_ADMIN, null, null, null, null, null, null).get(0);
+
+        assertEquals("Ana", e.clienteNombre());
+        assertEquals("Jose", e.actorNombre());
+    }
+
+    @Test
+    void consultaCadaPersonaUnaSolaVez() {
+        when(auditoriaRepository.obtenerTodos()).thenReturn(List.of(
+                evento(1, OID_ANA, "OrderCreated", "2026-11-24T10:00:00", OID_ANA, "CLIENTE"),
+                evento(2, OID_ANA, "OrderCancelled", "2026-11-24T10:05:00", OID_ANA, "CLIENTE")));
+
+        servicio.listar(OID_ADMIN, null, null, null, null, null, null);
+
+        verify(usuarioRepository, times(1)).obtener(OID_ANA);
+    }
+
+    @Test
+    void siClientesNoRespondeLaBitacoraIgualSeMuestra() {
+        when(auditoriaRepository.obtenerTodos()).thenReturn(List.of(
+                evento(1, OID_ANA, "OrderCreated", "2026-11-24T10:00:00")));
+        when(usuarioRepository.obtener(OID_ANA)).thenThrow(new RuntimeException("ms-clientes caído"));
+
+        EventoAuditoriaResponse e = servicio.listar(OID_ADMIN, null, null, null, null, null, null).get(0);
+
+        assertNull(e.clienteNombre());
+    }
+
+    @Test
+    void elClienteVeSiElCambioLoHizoElOLaTienda() {
+        when(auditoriaRepository.obtenerPorPedido(15L)).thenReturn(List.of(
+                evento(1, OID_ANA, "OrderCreated", "2026-11-24T10:00:00", OID_ANA, "CLIENTE"),
+                evento(2, OID_ANA, "OrderCancelled", "2026-11-24T10:05:00", OID_ADMIN, "ADMIN"),
+                evento(3, OID_ANA, "OrderAccepted", "2026-11-24T10:01:00")));
+
+        List<EventoPedidoResponse> historial = servicio.historialDePedido(OID_ANA, null, null, 15L);
+
+        assertEquals("CLIENTE", historial.get(0).hechoPor());
+        assertNull(historial.get(1).hechoPor()); // evento antiguo, sin actor
+        assertEquals("TIENDA", historial.get(2).hechoPor());
     }
 }

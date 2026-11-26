@@ -45,4 +45,21 @@ class UsuarioServiceTest {
 
         assertEquals(HttpStatus.FORBIDDEN, error.getStatusCode());
     }
+
+    @Test
+    void nombreDeUsaElCorreoSiNoHayNombre() {
+        UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
+        when(usuarioRepository.obtener("oid-3"))
+                .thenReturn(java.util.Optional.of(new UsuarioResponse("oid-3", " ", "luis@duoc.cl", "USER", null)));
+
+        assertEquals(java.util.Optional.of("luis@duoc.cl"), new UsuarioService(usuarioRepository).nombreDe("oid-3"));
+    }
+
+    @Test
+    void nombreDeNoFallaSiMsClientesNoResponde() {
+        UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
+        when(usuarioRepository.obtener("oid-4")).thenThrow(new RuntimeException("caído"));
+
+        assertEquals(java.util.Optional.empty(), new UsuarioService(usuarioRepository).nombreDe("oid-4"));
+    }
 }

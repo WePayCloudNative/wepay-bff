@@ -7,7 +7,10 @@ import cl.duoc.api.repository.AuditoriaRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -54,7 +57,27 @@ public class AuditoriaService {
         } else {
             eventos = sinNulos(auditoriaRepository.obtenerTodos());
         }
-        return eventos.stream().sorted(POR_FECHA.reversed()).toList();
+        return conNombres(eventos.stream().sorted(POR_FECHA.reversed()).toList());
+    }
+
+    /**
+     * Agrega el nombre del cliente y de quien hizo el cambio.
+     * Cada OID se consulta una sola vez por llamada, aunque aparezca en muchos eventos.
+     */
+    private List<EventoAuditoriaResponse> conNombres(List<EventoAuditoriaResponse> eventos) {
+        Map<String, Optional<String>> nombres = new HashMap<>();
+        return eventos.stream()
+                .map(e -> e.conNombres(
+                        nombreCacheado(nombres, e.usuarioOid()),
+                        nombreCacheado(nombres, e.actorOid())))
+                .toList();
+    }
+
+    private String nombreCacheado(Map<String, Optional<String>> nombres, String oid) {
+        if (oid == null) {
+            return null;
+        }
+        return nombres.computeIfAbsent(oid, usuarioService::nombreDe).orElse(null);
     }
 
     /**

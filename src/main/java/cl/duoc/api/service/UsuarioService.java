@@ -3,6 +3,7 @@ package cl.duoc.api.service;
 import cl.duoc.api.dto.DireccionDespacho;
 import cl.duoc.api.dto.UsuarioResponse;
 import cl.duoc.api.repository.UsuarioRepository;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,5 +39,21 @@ public class UsuarioService {
                     "Solo un administrador puede ver esta información");
         }
         return usuario;
+    }
+
+    /**
+     * Nombre para mostrar (nombre o, si no tiene, correo). Vacío si no existe o si
+     * ms-clientes no responde: mostrar un nombre es un extra, no debe romper la auditoría.
+     */
+    public Optional<String> nombreDe(String oid) {
+        if (oid == null || oid.isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            return usuarioRepository.obtener(oid)
+                    .map(u -> u.nombre() != null && !u.nombre().isBlank() ? u.nombre() : u.email());
+        } catch (RuntimeException e) {
+            return Optional.empty();
+        }
     }
 }
