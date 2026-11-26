@@ -27,7 +27,7 @@ class DataControllerTest {
         when(jwt.getClaimAsString("preferred_username")).thenReturn("ana@duoc.cl");
         when(jwt.getClaimAsString("name")).thenReturn("Ana");
 
-        UsuarioResponse esperado = new UsuarioResponse("oid-123", "Ana", "ana@duoc.cl", "user");
+        UsuarioResponse esperado = new UsuarioResponse("oid-123", "Ana", "ana@duoc.cl", "user", null);
         when(usuarioService.obtenerPerfil("oid-123", "ana@duoc.cl", "Ana")).thenReturn(esperado);
 
         // Pasamos los 3 servicios al constructor
@@ -44,7 +44,7 @@ class DataControllerTest {
         ProductService productService = mock(ProductService.class);
         PedidoService pedidoService = mock(PedidoService.class); // <-- Creamos el mock
         
-        List<ProductResponse> esperados = List.of(new ProductResponse("Producto", "Descripcion", 1000));
+        List<ProductResponse> esperados = List.of(new ProductResponse(1L, "Producto", "Descripcion", 1000, "Periféricos", "/img/productos/teclado.jpg", null));
         when(productService.obtenerProductos()).thenReturn(esperados);
 
         // Pasamos los 3 servicios al constructor

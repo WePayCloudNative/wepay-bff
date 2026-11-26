@@ -1,5 +1,6 @@
 package cl.duoc.api.controller;
 
+import cl.duoc.api.dto.DireccionDespacho;
 import cl.duoc.api.dto.UsuarioResponse;
 import cl.duoc.api.dto.ProductResponse;
 import cl.duoc.api.dto.PedidoRequest;
@@ -41,6 +42,15 @@ public class DataController {
         String nombre = jwt.getClaimAsString("name");
 
         return usuarioService.obtenerPerfil(oid, email, nombre);
+    }
+
+    @PutMapping("/perfil/direccion")
+    public UsuarioResponse guardarDireccion(@AuthenticationPrincipal Jwt jwt, @RequestBody DireccionDespacho direccion) {
+        return usuarioService.guardarDireccion(
+                jwt.getClaimAsString("oid"),
+                jwt.getClaimAsString("preferred_username"),
+                jwt.getClaimAsString("name"),
+                direccion);
     }
 
     @GetMapping("/productos")

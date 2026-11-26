@@ -1,0 +1,24 @@
+# Corre los tests en cada push y en cada Pull Request.
+# Si un test falla, el check queda en rojo y el PR no se debería mergear.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Compilar y correr los tests
+        run: mvn -B verify
