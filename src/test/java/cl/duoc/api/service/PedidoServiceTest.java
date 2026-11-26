@@ -104,7 +104,7 @@ class PedidoServiceTest {
     @Test
     void noSePuedeCancelarUnPedidoDespachado() {
         when(pedidoRepository.obtenerPorUsuario("oid-ana")).thenReturn(List.of(
-                new PedidoResponse(15L, "oid-ana", 89990.0, null, "DESPACHADO", List.of())));
+                new PedidoResponse(15L, "oid-ana", 89990.0, null, "DESPACHADO", List.of(), null, null)));
 
         esperarError(HttpStatus.CONFLICT, () -> servicio.cancelarPorCliente("oid-ana", 15L));
     }
@@ -112,7 +112,7 @@ class PedidoServiceTest {
     @Test
     void sePuedeCancelarUnPedidoRecienCreado() {
         when(pedidoRepository.obtenerPorUsuario("oid-ana")).thenReturn(List.of(
-                new PedidoResponse(15L, "oid-ana", 89990.0, null, "CREADO", List.of())));
+                new PedidoResponse(15L, "oid-ana", 89990.0, null, "CREADO", List.of(), null, null)));
 
         servicio.cancelarPorCliente("oid-ana", 15L);
 
